@@ -214,8 +214,6 @@ Boss Ranking Mode では、敵を1体倒してもSランクになることがあ
 
 ### 0x00 オブジェクトタイプ
 
-This value affects directly affects how the Enemy Value functions. You can use a slot to make objects like Rocks or enemies on the red or blue side. The full object type list is below.
-
 この値は、Enemy Value functions に直接影響します。この値を使って、岩や敵などのオブジェクトを赤や青の側に作ることができます。オブジェクトタイプの全リストは以下の通りです。
 
 ```
