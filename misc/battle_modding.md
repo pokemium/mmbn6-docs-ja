@@ -25,10 +25,10 @@ FalzarJP: 0x80b1430
 0x02 BGM
 0x03 戦闘モード
 0x04 背景
-0x05 Battle Count
+0x05 戦闘カウント
 0x06 Panel Column Pattern
-0x07 Unlock?
-0x08 Battle Effects (4 bytes)
+0x07 不明
+0x08 特殊効果 (4 bytes)
 0x0C Object Setup Pointer
 ```
 
@@ -206,7 +206,7 @@ Boss Ranking Mode では、敵を1体倒してもSランクになることがあ
 
 ```
 0x00 オブジェクトタイプ
-0x01 X- and Y-Coordinates
+0x01 X座標, Y座標
 0x02 Enemy Value (2 bytes)
 ```
 
@@ -265,7 +265,9 @@ A0 = Metal Cube
 
 ### 0x02 Enemy Value
 
-Enemy value is now handled by 2 bytes. 00-FF handle viruses while 0100-01FF handles Navis. The first byte of the Enemy Value also functions as the Flags HP. The full enemy list is below.
+Enemy Valueがは2バイトで表します。
+
+00～FFはウイルスを、0100～01FFはナビを扱います。また、Enemy Valueの1バイト目はフラッグのHPとしても機能します。全エネミーリストは以下の通りです。
 
 ```
 00 = Test Virus
@@ -679,9 +681,9 @@ EA = BassCrossMegaman
 01AB = ProtoMan
 ```
 
-Some notes:
+**いくつかの注意点**
 
-The Test Virus is a 500 HP Mettaur that never attacks.
+Test Virus は攻撃をしてこないHP500のメットールです。
 
 Enemies AF-B1 are the Flying Garbage enemies needed for the DustMan mini game. As DustMan, you crush or inhale the garbage. B2-B3 don't work properly.
 
@@ -695,14 +697,13 @@ Enemy values CD-EA are leftover names from BN5's Operation Battle. In-battle, th
 
 Enemy values 0191-019F all appear as a 4000 HP MegaMan.Values 01A0-01AB are names used to identify controllable characters and are recognized by enemies as hittable. In-battle, they all appear as a 100 HP MegaMan.
 
+## 最後に
 
+これでエグゼ6の対戦設定の説明は終わりです。
 
-That concludes the Mega Man Battle Network 6 Custom Battle guide.
+ここで述べたことを理解すれば次の動画のような戦闘を作ることも可能になります。
 
-Below is a sample video demonstrating some of the possibilities allowed with this guide.  
 http://youtube.com/watch?v=3SdZWCKdgMo
-
-You can contribute more to this or ask questions in this thread. Please do not contact me with questions regarding this.
 
 ## References
 
