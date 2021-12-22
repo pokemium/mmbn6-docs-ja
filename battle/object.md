@@ -1,10 +1,12 @@
 # バトルオブジェクト
 
+バトルオブジェクトは、ウイルスやナビ、チップが出すオブジェクトなど様々なバトル中のオブジェクトの便宜的な呼称です。
+
 ここではバトルオブジェクトの構造と、それ以外の衝突データやAIデータなどのデータについて説明します。
 
 これで大体の主要な機能は揃っていますが、まだまだ不明な点もあります。 いずれにしても、この情報を使ってかなり自由にバトルオブジェクトが書けるようになるはずです。
 
-## バトルオブジェクト
+## 💥 バトルオブジェクト
 
 まず、バトルオブジェクトそのものです。 これにはタイプ1,3,4があります。 タイプ0と2は無効なタイプで、エグゼ6にはこれらのためのメモリ領域がそもそもありません。
 
@@ -14,49 +16,84 @@
 
 ### データ構造
 
-```go
-type pointer = uint32
-
-type BattleObject struct {
-    Flags byte          // 01:active, 02:visible, ...
-    Index byte
-    TypeAndSpriteOffset byte
-    ListIndex byte
-    Params uint32
-    CurState byte       // 08h: 0=initialize, 4=update, 8=destroy
-    CurAction byte
-    CurPhase byte
-    PhaseInitialized bool // 1byte
-    Unk_0c, Unk_0d byte
-    Element byte
-    Unk_0f byte
-    CurAnim, CurAnimCopy byte // 10h, 11h
-    PanelX, PanelY byte
-    FuturePanelX, FuturePanelY byte
-    Alliance byte // 0 = friend, 1 = enemy
-    DirectionFlip byte
-    PreventAnim byte
-    Unk_19 byte
-    ChipsHeld byte
-    Unk_1b, Unk_1c, Unk_1d, Unk_1e, Unk_1f byte
-    Timer, Timer2 uint16 // 20h, 21h
-    HP uint16
-    MaxHP uint16
-    NameID uint16
-    Chip uint16
-    Damage uint16 // 0x8000 = double, 0x4000=paralyze, 0x2000=uninstall, 0x1000=killercross_skull_hit, 0x0800=nothing
-    StaminaDamageCounterDisabler uint16
-    Unk_30, Unk_32 uint16
-    X, Y, Z uint32
-    XVelocity, YVelocity, ZVelocity uint32
-    RelatedObject1Ptr, RelatedObject2Ptr pointer
-    CollisionDataPtr pointer // 54h
-    AIDataPtr pointer
-    Unk_5c uint32
-    ExtraVars [n]byte // n:t1,t3=44 28=t4
-    padding [4]byte
-    ObjectSprite ObjectSprite
-}
+```
+00h object flags bitfield
+    0x01 active
+    0x02 visable
+    0x04 updates during pause
+    0x08 Hide/Dont update sprite
+    0x10 updates during timestop
+    0x20
+    0x40
+    0x80
+01h object index
+02h object type/sprite offset
+    0x0F Object type
+    0xF0 relative sprite data offset (from start of object)
+03h object memory index
+04h object parameters1
+05h object parameters2
+06h object parameters3
+07h object parameters4
+08h current state, usually
+    0 - Initialize
+    4 - Update
+    8 - Destroy
+09h current "attack"/action (typically)
+0Ah current phase of "attack"/action (typically)
+0Bh indicates if current phase is initialized (typically)
+0Ch 
+0Dh 
+0Eh Element
+0Fh 
+10h current animation
+11h current animation(copy)
+12h Panel X
+13h Panel Y
+14h Future Panel X
+15h Future Panel Y
+16h Alliance
+    0 - friend
+    1 - enemy
+17h Direction Flip
+18h Prevent animation
+19h 
+1ah chips held
+1bh 
+1ch 
+1dh 
+1eh 
+1fh 
+20h Timer (typicaly)
+22h Secondary Timer (typically)
+24h curren thp
+26h max hp
+28h name id
+2Ah chip
+2Ch damage
+    8000 double damage
+    4000 paralyze
+    2000 Uninstall
+    1000 KillerCross Skull hit
+    0800 nothing
+    07FF damage
+2Eh stamina damage/counter disabler
+    7F stamina damage
+    80 disable counter
+34h Xposition
+38h Yposition
+3Ch Zposition
+40h X velocity
+44h Y velocity
+48h Z velocity
+4Ch pointer to parent / pointer to childobject1
+50h pointer to childobject2
+54h Collision data
+58h AI Data
+5Ch ?
+60h-7Ch - free space for object specific variables (type 4)
+60h-8Ch - free space for object specific variables (type 3)
+60h-8Ch - free space for object specific variables (type 1)
 ```
 
 オブジェクトは衝突データとAIデータを持つことができます。
@@ -67,115 +104,313 @@ type BattleObject struct {
 
 ### 衝突データ
 
-```go
-type Collision struct {
-    Enabled bool
-    Region byte
-    PrimaryElement byte
-    Unk03 byte
-    Alliance byte
-    Flip byte
-    Barrier byte
-    StaminaDamageCounterDisabler byte
-    PoisonPanelTimer byte
-    HitEffect byte
-    PanelX, PanelY byte
-    Direction byte // 0bh
-    CounterTimer byte
-    HitModifierBase, HitModifierFinal byte // 0e,0fh
-    StatusEffectBase, StatusEffectFinal byte // 10,11h
-    Bugs uint16 // 12h
-    Unk14, Unk15, Unk16, Unk17 byte
-    SecondaryElementWeakness, SecondaryElement byte
-    Unk1a, Unk1c, Unk1e, Unk20, Unk22, Unk24, Unk26, Unk28, Unk2a, Unk2c uint16
-    SelfDamage uint16 // 2eh
-    SelfCollisionTypeFlags uint32 // 30h
-    TargetCollisionTypeFlags uint32 // 34h
-    ParentObjectPtr pointer // 38h
-    ObjectFlags1, ObjectFlags2 uint32
-    CollisionIndexBit uint32
-    Unk48, Unk4c, Unk50, Unk54, Unk58, Unk5c, Unk60, Unk64, Unk68, Unk6c uint32
-    FlagsFromCollision uint32 // 70h
-    ExclamationIndicator byte
-    DamageMultiplier byte
-    DamageElements byte
-    Unk77 byte
-    Unk78, Unk7c uint32
-    FinalDamage uint16
-    PanelDamage1, PanelDamage2, PanelDamage3, PanelDamage4, PanelDamage5, PanelDamage6 uint16
-    Unk8e, Unk90, Unk92 uint16
-    NullElementDamage, HeatElementDamage, AquaElementDamage, ElecElementDamage, WoodElementDamage uint16
-    Unk9e uint16
-    UnkA0 uint32
-    InflictedBugs uint32
-}
-```
-
-**ObjectFlags1**
+衝突データのサイズは 168バイト です。
 
 ```
-00000001 Guard
-00000002 ?
-00000004 ?
-00000008 invulnerable
-00000010 airshoe
-00000020 floatshoe
-00000040 currently moving
-00000080 ?
-00000100 ?
-00000200 ?
-00000400 ?
-00000800 paralyzed
-00001000 ?
-00002000 ?
-00004000 immobilized
-00008000 ?
-00010000 frozen
-00020000 superarmor
-00040000 undershirt
-00080000 currently moving
-00100000 ?
-00200000 ?
-00400000 ?
-00800000 ?
-01000000 ?
-02000000 affected by ice
-04000000 ?
-08000000 unaffected by poison
-10000000 ?
-20000000 ?
-40000000 ?
-80000000 ?
+00h Enabled/Disabled?
+01h Collision Reigon
+02h Primary Element
+03h ?
+04h Alliance
+05h Flip
+06h
+07h stamina damage/counter disabler
+08h poison panel timer
+09h hit effect
+0Ah PanelX
+0Bh PanelY
+0Ch Direction
+0Dh Counter Timer
+0Eh Hit Modifier base
+0Fh Hit Modifier final
+10h Status Effect base
+11h Status Effect final
+12h Bugs
+14h
+18h Secondary element Weakness
+19h Secondary element
+24h
+26h
+2Eh self damage
+30h self collision type flags
+34h target collision type flags
+38h parent object
+3Ch object flags
+    00000001 Guard
+    00000002 ?
+    00000004 ?
+    00000008 invulnerable
+    00000010 airshoe
+    00000020 floatshoe
+    00000040 currently moving
+    00000080 ?
+    00000100 ?
+    00000200 ?
+    00000400 ?
+    00000800 paralyzed
+    00001000 ?
+    00002000 ?
+    00004000 immobilized
+    00008000 ?
+    00010000 frozen
+    00020000 superarmor
+    00040000 undershirt
+    00080000 currently moving
+    00100000 ?
+    00200000 ?
+    00400000 ?
+    00800000 ?
+    01000000 ?
+    02000000 affected by ice
+    04000000 ?
+    08000000 unaffected by poison
+    10000000 ?
+    20000000 ?
+    40000000 ?
+    80000000 ?
+40h object flags2
+44h collision index bit
+54h ?
+70h flags from a collision(bits from Collision Type list)
+74h !! indicator
+75h damage multiplier
+76h damage elements
+7Ch
+80h final damage
+82h PanelDamage1
+84h PanelDamage2
+86h PanelDamage3
+88h PanelDamage4
+8Ah PanelDamage5
+8Ch PanelDamage6, used for poison
+A4h Inflicted Bugs
 ```
 
 ### AIデータ
 
-```go
-type AI struct {
-    ActorType byte // 0=ウイルス, 1=ネットナビ, 2=プレイヤー
-    AIIndex byte
-    Unk02 [13]byte
-    Unk0E byte // 0xFFで固定?
-    Unk0F [7]byte
-    Version1, Version2 byte
-    Unk24 [8]byte
-    TotalDamageTaken uint16
-    JoypadHeld, JoypadPressed, JoypadUp, JoypadReleased uint16
-    Unk42 [5]uint16
-    Anger uint16
-    Unk54 [74]byte
-    AIState [32]byte
-    AttackVars [80]byte
-}
+AIデータのサイズは 256バイト です。
+
+```
+00h Virus/Navi indicator
+    00h Virus
+    01h Navi
+    02h Player
+01h AI index
+02h 
+03h 
+0Eh FF
+16h Version/Level
+17h Version/Level
+18h 
+19h 
+20h total damage received
+22h keys held
+24h keys down
+26h keys up
+28h previous keys held
+34h anger bool
+80h start of AI state (0x20 bytes)
+A0h start of attack variable reigon (0x50 bytes)
 ```
 
 ### 衝突タイプ
 
 [衝突タイプ](collision_type.md)参照
 
-## 解析の例1 メタルブレード
+## 📚 Important Object Functions (same for both games)
 
-![metalblade](img/1lxygkd.gif)
+```
+.definelabel sound_play, 0x080005CC
+.definelabel bgmusic_play, 0x080005D4
+.definelabel sprite_load_animation_data, 0x080026A4
+.definelabel sprite_update, 0x080026C4
+;r0 = 0x80
+;r1 = sprite category
+;r2 = sprite index
+.definelabel sprite_load, 0x080026E4
+.definelabel sprite_initialize, 0x0800272C
+.definelabel sprite_decompress,0x08002B30
+.definelabel sprite_set_scale_parameters,0x08002C24
+.definelabel sprite_set_mosaic_scaling_parameters, 0x08002C7E
+.definelabel sprite_get_mosaic_scaling_parameters, 0x08002CE0
+.definelabel sprite_make_scalable, 0x08002D14
+.definelabel sprite_make_unscalable, 0x08002D52
+.definelabel sprite_set_palette, 0x08002D80
+.definelabel sprite_get_palette, 0x08002D8C
+.definelabel sprite_set_animation_alt, 0x08002D98
+.definelabel sprite_set_animation, 0x08002DA4
+.definelabel sprite_force_white_palette,0x08002DB0
+.definelabel sprite_set_final_palette, 0x08002DB4
+.definelabel sprite_get_final_palette, 0x08002DC8
+.definelabel sprite_clear_final_palette, 0x08002DD8
+.definelabel sprite_get_frame_parameters, 0x08002DEA
+.definelabel sprite_has_shadow, 0x08002E3C
+.definelabel sprite_set_color_shader, 0x08002ED0
+.definelabel sprite_get_color_shader, 0x08002EDC
+.definelabel sprite_set_mosaic_size, 0x08002EF6
+.definelabel sprite_set_flip, 0x08002F5C
+.definelabel sprite_get_flip, 0x08002F7E
+.definelabel sprite_no_shadow, 0x08002F90
+.definelabel sprite_set_coordinates, 0x0800307C
+.definelabel sprite_add_coordinates, 0x0800308A
+.definelabel sprite_get_coordinates, 0x080030A8
+;r0 = object id
+;r1 = xcoordinate
+;r2 = ycoordinate
+;r3 = zcoordinate
+;r4 = parameter word
+.definelabel object_spawn_type1, 0x08003320
+;r0 = object id
+;r1 = xcoordinate
+;r2 = ycoordinate
+;r3 = zcoordinate
+;r4 = parameter word
+.definelabel object_spawn_type3, 0x08003358
+;r0 = object id
+;r1 = xcoordinate
+;r2 = ycoordinate
+;r3 = zcoordinate
+;r4 = parameter word
+.definelabel object_spawn_type4, 0x080033AC
+.definelabel object_free_memory, 0x08003458
+.definelabel engine_set_screeneffect, 0x08006270
+.definelabel engine_is_screeneffect_animating, 0x080062F8
+.definelabel math_sin_table, 0x080065E0
+.definelabel math_cos_table, 0x08006660
+.definelabel battle_is_paused, 0x0800A03C
+.definelabel battle_is_timestop, 0x0800A098
+.definelabel battle_is_battle_over, 0x0800A18E
+.definelabel battle_set_flags, 0x0800A2D8
+.definelabel battle_clear_flags, 0x0800A2E4
+.definelabel battle_get_flags, 0x0800A2F0
+.definelabel battle_network_invert, 0x0800A9EC
+.definelabel battle_clear_enemy_fadein_list, 0x0800A9F6
+.definelabel object_timefreeze_begin, 0x0800B916
+.definelabel object_dim_screen, 0x0800B94C
+.definelabel object_draw_chipname, 0x0800B9B0
+.definelabel object_undim_screen, 0x0800BC88
+.definelabel object_timefreeze_end, 0x0800BD34
+.definelabel object_get_panel_parameters, 0x0800C8F8
+.definelabel object_get_panel_data_offset, 0x0800C90A
+.definelabel object_update_panel_parameters, 0x0800C928
+.definelabel object_crack_panel, 0x0800C938
+.definelabel object_crack_panel_dup1, 0x0800C998
+.definelabel object_break_panel, 0x0800C9F8
+.definelabel object_break_panel_dup1, 0x0800CA34
+.definelabel object_break_panel_dup2, 0x0800CA8C
+.definelabel object_break_panel_dup3, 0x0800CAE8
+.definelabel object_break_panel_loud, 0x0800CB44
+.definelabel object_panel_set_poison, 0x0800CBA0
+.definelabel object_highlight_panel, 0x0800CBD8
+.definelabel object_highlight_panel_blue, 0x0800CBEE
+.definelabel object_set_panel_type, 0x0800CC0A
+.definelabel object_set_panel_alliance, 0x0800CC14
+.definelabel object_set_panel_alliance_timer_long, 0x0800CC36
+.definelabel object_set_panel_alliance_timer_short, 0x0800CC44
+.definelabel object_set_panel_type_blink, 0x0800CC52
+.definelabel object_is_current_panel_solid,0x0800CCA6
+.definelabel object_is_panel_solid, 0x0800CCB2
+.definelabel object_is_current_panel_valid, 0x0800CC66
+.definelabel object_is_valid_panel, 0x0800CC72
+.definelabel object_check_panel_parameters, 0x0800CC86
+.definelabel object_highlight_current_collision_panels, 0x0800CCBE
+.definelabel object_highlight_panel_region, 0x0800CCD4
+.definelabel object_highlight_panel_region_blue, 0x0800CD20
+.definelabel object_get_panels_type_alliance_count, 0x0800CDB4
+.definelabel object_get_panels_type_count, 0x0800CE04
+.definelabel object_hide_panel, 0x0800CE32
+.definelabel object_show_panel, 0x0800CE42
+.definelabel object_get_panels_except_current_filtered, 0x0800CE64
+.definelabel object_get_panels_filtered, 0x0800CEA0
+.definelabel object_get_random_panel_from_current_column, 0x0800CED0
+.definelabel object_get_panels_in_column_ignore_row_filtered, 0x0800CF14
+.definelabel object_get_panels_in_row_ignore_column_filtered, 0x0800CF42
+.definelabel object_get_panels_ignore_row_filtered, 0x0800CF70
+.definelabel object_get_panels_ignore_column_filtered, 0x0800CFA6
+.definelabel object_get_panels_in_column_filtered, 0x0800CFDC
+.definelabel object_get_panels_in_row_filtered, 0x0800D012
+.definelabel object_get_enemy_player_panel_y, 0x0800D048
+.definelabel object_get_enemy_player_panels, 0x0800D06A
+.definelabel object_get_closest_panel_matching_row_filtered, 0x0800D086
+.definelabel object_get_first_panel_in_direction_filtered, 0x0800D0BC
+.definelabel object_get_first_panel_in_direction_within_distance_filtered, 0x0800D0DC
+.definelabel object_get_first_panel_in_direction_filtered_dup1, 0x0800D100
+.definelabel object_get_panel_reigon, 0x0800D3FE
+.definelabel object_get_edge_panel_matching_row, 0x0800D4C2
+.definelabel object_get_coordinates_for_panels, 0x0800E276
+.definelabel object_set_coordinates_from_panels, 0x0800E29C
+.definelabel object_set_panels_from_coordinates, 0x0800E2AC
+.definelabel object_get_enemy_direction, 0x0800E2C0
+.definelabel object_get_alliance_direction, 0x0800E2C2
+.definelabel object_get_front_direction, 0x0800E2CA
+.definelabel object_get_flip_direction, 0x0800E2CE
+.definelabel object_subtract_hp, 0x0800E2D8
+.definelabel object_add_hp, 0x0800E2EC
+.definelabel object_calculate_final_damage1, 0x0800E3DE
+.definelabel object_calculate_final_damage2, 0x0800E420
+.definelabel object_get_flip, 0x0800E456
+.definelabel object_can_move, 0x0800E5E2
+.definelabel object_set_counter_time, 0x0800E9DC
+.definelabel object_set_invulnerable_time, 0x0800EAFA
+.definelabel object_get_enemy_by_name_range, 0x0800EBD4
+.definelabel object_spawn_hiteffect, 0x0800EB9E
+.definelabel object_create_ai_data, 0x0800ED2C
+.definelabel enemy_get_struct1, 0x0800F214
+.definelabel enemy_get_struct2, 0x0800F23C
+.definelabel object_set_default_counter_time, 0x0800FDB6
+.definelabel object_set_animation, 0x0800F2B6
+.definelabel object_apply_damage, 0x0801162A
+.definelabel object_setattack0,0x08011680
+.definelabel object_setattack1,0x08011684
+.definelabel object_setattack2,0x08011688
+.definelabel object_setattack3,0x0801168C
+.definelabel object_setattack4,0x08011690
+.definelabel object_setattack5,0x08011694
+.definelabel object_exit_attack_state, 0x08011714
+.definelabel object_generic_destroy, 0x08016C8A
+.definelabel object_create_collision_data, 0x08019892
+;r0 = collision data offset
+;r1 = self collision type
+;r2 = target collision type
+;r3 = collision modifier
+.definelabel object_setup_collision_data, 0x08019FB4
+.definelabel object_remove_collision_data, 0x0801A00E
+.definelabel object_present_collision_data, 0x0801A018
+.definelabel object_update_collision_panels, 0x0801A04C
+.definelabel object_set_collision_panels_to_current, 0x0801A066
+.definelabel object_clear_collision_reigon, 0x0801A074
+.definelabel object_set_collision_reigon, 0x0801A07C
+.definelabel object_spawn_collision_effect, 0x0801A0D4
+.definelabel object_set_collision_hit_effect, 0x0801A140
+.definelabel object_set_flag, 0x0801A152
+.definelabel object_clear_flag, 0x0801A15C
+.definelabel object_get_flag, 0x0801A166
+.definelabel object_set_flag2, 0x0801A16C
+.definelabel object_clear_flag2, 0x0801A176
+.definelabel object_get_flag2, 0x0801A180
+.definelabel object_set_collision_status_effect1, 0x0801A258
+.definelabel object_set_collision_status_effect2, 0x0801A25E
+.definelabel object_reserve_panel, 0x0801BB1C
+.definelabel object_remove_panel_reserve, 0x0801BB46
+.definelabel object_update_sprite, 0x0801BBAC
+.definelabel object_update_sprite_timestop, 0x0801BBF4
+.definelabel object_update_sprite_paused, 0x0801BCA6
+.definelabel sprite_getflip_from_r0, 0x08022F7E
+;Game Dependent Labels
+;r0 =panelx
+;r1 =panely
+;r2 =element
+;r3 =zcoordinate
+;r4 =parameter word (SelfType | TargetType | hit effect| shape)
+;r5 =parent object
+;r6 =damage
+;r7 =(????|Status effect|hit modifiers)
+.definelabel spawn_collision_region, 0x080C536A
+```
+
+## ⚙️ 解析の例1 メタルブレード
+
+![metalblade](../images/battle_object_ex1.gif)
 
 上の例はGreiga Master氏のパッチ中のメタルブレードのチップのコードを修正したものです。
 
@@ -456,9 +691,9 @@ updateルーチンの間、オブジェクトは衝突が起きたかどうか�
 
 movementルーチンのコードは、添付のフルコードにあります。
 
-## 解析の例2 Magtect
+## 🧲 解析の例2 Magtect
 
-![magtect](img/pQfcKKl.gif)
+![magtect](../images/battle_object_ex2.gif)
 
 この例では、プレイヤーの入力を受けて外部衝突領域を使用するサポートオブジェクトを使用した攻撃について説明します。
 
@@ -724,3 +959,4 @@ You can look at the attached full code to see how the objects/attacks were added
 ## 参考記事
 
 - [BN6 Battle Objects Data](https://forums.therockmanexezone.com/bn6-battle-objects-data-t5346.html)
+
