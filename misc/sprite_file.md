@@ -33,21 +33,26 @@ type SpriteFile struct {
 
 アニメーションデータは4バイトのデータが5個集まってできています。
 
-- data1: グラフィックサイズへのポインタ
-- data2: パレットサイズへのポインタ
-- data3: ゴミデータへのポインタ
-  - 使われていない
-- data4: OAMデータへのポインタ
-  - all regular sprites have a pointer of 00000004
-  - pointers are relative to initial read point
-  - mugshots use more pointers than regular sprites
-- data5: アニメーションの長さ・タイプ
-  - 2バイト×2で構成(0x00xx, 0x00yy)
-  - 0x00xx: delay(1/60秒単位)
-  - 0x00yy: アニメーションタイプ
-    - 0x00: 通常(このフレームをdelayの間保持)
-    - 0x80: アニメーションの終わり
-    - 0xc0: ループアニメーションの終端
+```
+Bytes | Expl.
+---------------
+0-3:      グラフィックサイズへのポインタ
+            - reads 4 bytes to determine # of bytes to load for graphics
+4-7:      パレットサイズへのポインタ
+            - reads 4 bytes to determine # of bytes to load for palette
+8-11:     ゴミデータへのポインタ(使われていません)
+12-16:    OAMデータへのポインタ
+            - all regular sprites have a pointer of 00000004
+            - pointers are relative to initial read point
+            - mugshots use more pointers than regular sprites
+17-20:    アニメーションの長さ・タイプ
+            - 2バイト×2で構成((0xXX, 0xYY) x2)
+            - 0xXX: delay(1/60秒単位)
+            - 0xYY: アニメーションタイプ
+              - 0x00: 通常(このフレームをdelayの間保持)
+              - 0x80: アニメーションの終わり
+              - 0xc0: ループアニメーションの終端
+```
 
 ## スプライトデータ(`.SpriteData`)
 
@@ -82,14 +87,14 @@ Offset | Expl.
 1:       X座標。
 2:       Y座標。
 3:       OAMのサイズ・回転(上位ニブル: 回転、下位ニブル: サイズ)
-          - 0X: 反転無し
-          - 4X: X反転
-          - 8X: Y反転
-          - CX: XY反転
-          - X0: 8x8タイル
-          - X1: 16x16タイル
-          - X2: 32x32タイル
-          - X3: 64x64タイル
+          0x0X: 反転無し
+          0x4X: X反転
+          0x8X: Y反転
+          0xCX: XY反転
+          0xX0: 8x8タイル
+          0xX1: 16x16タイル
+          0xX2: 32x32タイル
+          0xX3: 64x64タイル
 4:       OAM modifier/palette increment(left side sets a new palette, right side sets modified size)
           - ex. 10 means the next palette will be used for the entire sprite
           - only the first OAM can use this
