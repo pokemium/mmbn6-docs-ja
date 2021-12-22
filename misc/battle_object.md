@@ -720,6 +720,6 @@ Attack then uses another collision region to attack the panel in front of the ma
 
 You can look at the attached full code to see how the objects/attacks were added to the game.
 
-## References
+## 参考記事
 
 - [BN6 Battle Objects Data](https://forums.therockmanexezone.com/bn6-battle-objects-data-t5346.html)

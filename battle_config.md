@@ -705,6 +705,6 @@ Enemy values 0191-019F all appear as a 4000 HP MegaMan.Values 01A0-01AB are name
 
 http://youtube.com/watch?v=3SdZWCKdgMo
 
-## References
+## 参考記事
 
 - [MMBN6 Custom Battle Guide](https://forums.therockmanexezone.com/mmbn6-custom-battle-guide-t5316.html)

@@ -60,6 +60,6 @@ NCPが正しいグループを持っているかどうかを確認すること�
  0b | ステータスバグ
  0c | ステータスバグ
 
-## References
+## 参考記事
 
 - [BN6 NCP format](https://forums.therockmanexezone.com/bn6-ncp-format-t5257.html)

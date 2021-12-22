@@ -33,6 +33,6 @@ etc.
 NOTE: there is no padding if there is less than 5 required PA chips! This means that if you want to make a certain PA combination require more chips, it needs to be re-pointed to free space.
 
 
-## References
+## 参考記事
 
 - [BN4/BN5/BN6 Program Advance structure](https://forums.therockmanexezone.com/bn4-bn5-bn6-program-advance-structure-t5337.html)

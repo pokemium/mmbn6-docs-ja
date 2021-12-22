@@ -371,6 +371,6 @@ MovementHandler:
     .word MovementHandler           ; jump back to start of path
 ```
 
-## References
+## 参考記事
 
 - [Modifying Map NPCs](https://forums.therockmanexezone.com/modifying-map-npcs-t5333.html)

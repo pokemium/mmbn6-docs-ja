@@ -261,6 +261,6 @@ object list内のすべてのオブジェクトは同じパレットを使用し
 
 ゴミデータのパターンは明らかにされていませんが、完全に使われていないので、無視しても大丈夫です。
 
-## References
+## 参考記事
 
 - [BN Sprite Archive Format (revised)](https://forums.therockmanexezone.com/bn-sprite-archive-format-revised-t5403.html)

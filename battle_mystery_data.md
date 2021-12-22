@@ -1,6 +1,10 @@
 # バトルミステリーデータ
 
-後半のゲームでは、ミステリーデータが戦闘時にフィールドに出現することがあります。壊さずに戦闘に勝利すると、そのデータを手に入れることができる。
+![](images/battle_mystery_data.png)
+
+後半のゲームでは、ミステリーデータが戦闘時にフィールドに出現することがあります。壊さずに戦闘に勝利すると、そのデータを手に入れることができます。
+
+ここではそのミステリーデータのことをバトルミステリーデータと呼びます。
 
 以下の情報はFalzarUSに関するものです。
 
@@ -110,6 +114,6 @@ C005 BugFrags 5
 228B Meteors R
 ```
 
-## References
+## 参考記事
 
 - [BN4/BN5/BN6 Battle Mystery Data](https://forums.therockmanexezone.com/bn4-bn5-bn6-battle-mystery-data-t5339.html)

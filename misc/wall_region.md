@@ -569,6 +569,6 @@ demo_map_color_shader:
 
 そのために必要なフラグをセットに、Updateフラグリスナーはフラグをクリアし、プレイヤーがAttribute`0x11`のタイル上にいる場合にのみ、再度フラグをセットします。
 
-## References
+## 参考記事
 
 - [MMBN Map Wall/Region Format](https://forums.therockmanexezone.com/mmbn-map-wall-region-format-t16550.html)

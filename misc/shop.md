@@ -32,6 +32,6 @@ type ShopItem struct {
 }
 ```
 
-## References
+## 参考記事
 
 - [BN3/BN4/BN5/BN6 shop notes](https://forums.therockmanexezone.com/bn3-bn4-bn5-bn6-shop-notes-t5338.html)

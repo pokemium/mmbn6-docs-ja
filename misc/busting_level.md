@@ -54,6 +54,6 @@ Check 9: Cross Used (singleplayer)
 If you did not use a cross busting level +1
 ```
 
-## References
+## 参考記事
 
 - [MMBN 6 Busting Level Calculations](https://forums.therockmanexezone.com/mmbn-6-busting-level-calculations-t5315.html)
