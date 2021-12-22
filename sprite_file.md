@@ -25,9 +25,13 @@ type SpriteFile struct {
         PaletteDatum []Palette
     }
     JunkData [3][4]byte
-    OamDataArray []OamData
+    OamDatum []OamData
 }
 ```
+
+## メタデータヘッダ(`.MetadataHeader`)
+
+[アーカイブファイル](./sprite_archive.md)のメタデータヘッダと内容は同じです。
 
 ## アニメーションデータ(`.AnimationData`)
 
@@ -70,7 +74,7 @@ Bytes | Expl.
 - スプライトに影響を与えない、4バイトデータ×3
 - オフセット`00000004`を指すポインタから始まり、`FF800100 FFFFFFFF`と続きます。
 
-## OAMデータ(`.OamDataArray`)
+## OAMデータ(`.OamDatum`)
 
 OAMデータの配列です。
 

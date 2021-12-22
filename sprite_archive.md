@@ -58,6 +58,8 @@ type Object struct {
 ```go
 type SpriteArchive struct {
     MetadataHeader [4]byte
+
+    // AnimationPointerTable
     SpriteAnimation0 struct {
         Frame0 struct {
             TileSet struct {
@@ -88,7 +90,7 @@ type SpriteArchive struct {
 }
 ```
 
-## メタデータヘッダ
+## メタデータヘッダ(`.MetadataHeader`)
 
 各スプライトアーカイブは4バイトのメタデータヘッダを先頭に持っています。
 
@@ -104,7 +106,7 @@ type SpriteArchive struct {
 
 タイル枚数(0x00)は基本的に最大値(size of bitmap data / 0x20)をとります。
 
-## アニメーションポインタ
+## アニメーションポインタ(`.AnimationPointerTable`)
 
 メタデータヘッダの直後にはアニメーションポインタのテーブルが続きます。
 
@@ -117,19 +119,18 @@ type SpriteArchive struct {
 すべてのポインタはアニメーションポインタのテーブル(の先頭)からの相対値をとります。
 
 ```
-フレームデータ (20 bytes):
-+0x00: (int) タイルセットのポインタ
-+0x04: (int) パレットのポインタ
-+0x08: (int) ミニアニメーションへのポインタ
-+0x0C: (int) Objectsへのポインタ
-+0x10: (byte) delay
-+0x11: (byte) 0x00で固定？
-+0x12: (byte) flags
-+0x13: (byte) 0x00で固定？
-
-Frame flags (+0x12):
-0x80: アニメーションの最後のフレーム
-0x40: loop animation
+オフセット | 内容
+--------------------------------------
+0x00        タイルセットのポインタ(4byte)
+0x04        パレットのポインタ(4byte)
+0x08        ミニアニメーションへのポインタ(4byte)
+0x0C        Objectsへのポインタ(4byte)
+0x10        delay(1byte)
+0x11        0x00で固定？(1byte)
+0x12        flags(1byte)
+                0x80  アニメーションの最後のフレームかどうか
+                0x40  loop animation
+0x13        0x00で固定？(1byte)
 ```
 
 アニメーションの最後のフレームはflags(0x12)が必ず、アニメーションの終わりを表す0x80でなくてはいけません。
@@ -152,7 +153,7 @@ Frame flags (+0x12):
 
 ## パレットブロック
 
-パレットブロックの先頭には各パレットのサイズ（常に0x20)が格納されており、その後に長さ1以上16以下のパレットの配列が続きます。
+パレットブロックの先頭には各パレットのサイズ(常に0x20)が格納されており、その後に長さ1以上16以下のパレットの配列が続きます。
 
 このデータフォーマットからはパレットの配列の長さ、つまりパレットブロックにパレットがいくつ含まれているかを知ることができません。
 
