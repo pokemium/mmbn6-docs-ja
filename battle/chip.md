@@ -61,12 +61,12 @@
 0x0D DarkSoul MegaMan usage behavior (1byte)
 0x0E Unknown (8-bit unknown)
 0x0F Lock-on enable (1-bit flag)
-0x10 Attack parameter 1 (8-bit value)
-0x11 Attack parameter 2 (8-bit value)
-0x12 Attack parameter 3 (8-bit value)
-0x13 Attack parameter 4 (8-bit value)
-0x14 Chip use delay frames (8-bit value)
-0x15 Library number (8-bit value) (BN6)
+0x10 Attack parameter 1 (1 byte)
+0x11 Attack parameter 2 (1 byte)
+0x12 Attack parameter 3 (1 byte)
+0x13 Attack parameter 4 (1 byte)
+0x14 Chip use delay frames (1 byte)
+0x15 Library number (1 byte) (BN6)
 0x16 Chip Library flags (8-bit bitfield) (NOTE: For unknown reasons, BigHook is labeled a Falzar Giga chip and MetrKnuk is labeled a Gregar Giga chip.)
 	0x01 = Secret Library chip
 	0x02 = ?
