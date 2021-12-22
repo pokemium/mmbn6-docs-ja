@@ -215,7 +215,7 @@ A0h start of attack variable reigon (0x50 bytes)
 
 ### 衝突タイプ
 
-[衝突タイプ](collision_type.md)参照
+[衝突タイプ](object_collision_type.md)参照
 
 ## 📚 Important Object Functions (same for both games)
 
