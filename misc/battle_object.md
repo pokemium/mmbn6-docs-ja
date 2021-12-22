@@ -16,6 +16,7 @@
 
 ```go
 type pointer = uint32
+
 type BattleObject struct {
     Flags byte          // 01:active, 02:visible, ...
     Index byte
