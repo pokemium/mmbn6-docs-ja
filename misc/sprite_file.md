@@ -2,17 +2,15 @@
 
 ロックマンエグゼにおけるスプライトファイルのデータフォーマットは次のようになっています。
 
-スプライトファイルはスプライトアーカイブ(アニメーションポインタの集合)に加えて実際のアニメーションデータも含んだものです。
-
-なので、[スプライトアーカイブ](sprite_archive.md)を先に読んでおくことを推奨します。
+スプライトファイルは[スプライトアーカイブ(アニメーションポインタの集合)](sprite_archive.md)に加えて実際のアニメーションデータも含んだものです。
 
 ```go
-
 type Spr4BppData []byte // 4bpp?
 type Palette [16]uint16
+type OamData [5]byte // 後述
 
 type SpriteFile struct {
-    // same as sprite archive
+    // スプライトアーカイブと同じ内容
     MetadataHeader [4]byte
     AnimationPointerTable []SpriteAnimation
 
@@ -27,11 +25,11 @@ type SpriteFile struct {
         PaletteDatum []Palette
     }
     JunkData [3][4]byte
-    // oam data
+    OamDataArray []OamData
 }
 ```
 
-## アニメーションデータ
+## アニメーションデータ(`.AnimationData`)
 
 アニメーションデータは4バイトのデータが5個集まってできています。
 
@@ -51,43 +49,54 @@ type SpriteFile struct {
     - 0x80: アニメーションの終わり
     - 0xc0: ループアニメーションの終端
 
-## スプライトデータ
+## スプライトデータ(`.SpriteData`)
 
 - スプライトデータの先頭には1つのスプライトのサイズを表す4バイトのデータが格納されています。
 - スプライトデータは1ピクセル=4bitです。
 
-## パレットデータ
+## パレットデータ(`.PaletteData`)
 
 - パレットデータも先頭にはパレット1つのサイズを表す4バイトのデータが格納されています。
 - パレットデータは16色で構成されており、最初の色は透明です。
 - すべてのパレットは、次から次へと続き、ランダムアクセスされることはありません。
 
+## ゴミデータ(`.JunkData`)
 
-## ゴミデータ
+- スプライトに影響を与えない、4バイトデータ×3
+- オフセット`00000004`を指すポインタから始まり、`FF800100 FFFFFFFF`と続きます。
 
-- スプライトに影響を与えない 4バイトデータ×3
-- 00000004のポインタから始まり、FF800100 FFFFFFFFと続きます。
+## OAMデータ(`.OamDataArray`)
 
-## OAMデータ
+OAMデータの配列です。
 
-- sets the sprite dimensions, palette increment, and position
-- each OAM is built using 5 bytes of data
-    * tile: determines which tile to start building from based on the position set by animation data
-    * x-position: sets x-position of the tile (FF is a negative position and 01 is a positive position)
-    * y-position: sets y-position of the tile
-    * OAM size/rotation: left side of the byte sets rotation, right side sets size
-- 00= no flip
-- 40= horizontal flip
-- 80= vertical flip
-- C0= horizontal-vertical flip
+各OAMデータは5byteで、スプライトの次元、パレットのインクリメント(量)、位置データがセットされています。
 
-- 00= 8x8 tile
-- 01= 16x16 tile
-- 02= 32x32 tile
-- 03= 64x64 tile
-    * OAM modifier/palette increment: left side sets a new palette, right side sets modified size
-- ex. 10 means the next palette will be used for the entire sprite
-- only the first OAM can use this
-- modifier: see "OAM Modifier Table"
-- new OAM data follows directly after the last OAM data
-- to end oam data set FF FF FF FF FF
+配列の終わりには終端記号として`FF FF FF FF FF`がきます。
+
+### 各OAMデータ(5byte, `OamData`)のフォーマット
+
+```
+Offset | Expl.
+---------------
+0:       タイル。アニメーションデータで設定した位置に基づいて、どのタイルからビルドを開始するかを決定します。
+1:       X座標。
+2:       Y座標。
+3:       OAMのサイズ・回転(上位ニブル: 回転、下位ニブル: サイズ)
+          - 0X: 反転無し
+          - 4X: X反転
+          - 8X: Y反転
+          - CX: XY反転
+          - X0: 8x8タイル
+          - X1: 16x16タイル
+          - X2: 32x32タイル
+          - X3: 64x64タイル
+4:       OAM modifier/palette increment(left side sets a new palette, right side sets modified size)
+          - ex. 10 means the next palette will be used for the entire sprite
+          - only the first OAM can use this
+          - modifier: see "OAM Modifier Table"
+```
+
+## 参考記事
+
+- [BN Sprite File Format](https://forums.therockmanexezone.com/viewtopic.php?p=178724#p178724)
+

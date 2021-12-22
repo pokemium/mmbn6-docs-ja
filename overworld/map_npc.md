@@ -314,7 +314,7 @@ Jumps to p0 if [0x0200A443] != 0
 
 ### 例1:
 
-![minimal_npc](img/mcbv6w6.png)
+![minimal_npc](../images/map_npc_ex1.png)
 
 棒立ちでプレイヤーと会話できるNPCを作る場合
 
@@ -332,7 +332,7 @@ Jumps to p0 if [0x0200A443] != 0
 
 ### 例2:
 
-![motion_npc](img/jUoZMLj.gif)
+![motion_npc](../images/map_npc_ex2.gif)
 
 歩き回ることができプレイヤーと会話できるNPCを作る場合
 

@@ -959,4 +959,4 @@ You can look at the attached full code to see how the objects/attacks were added
 ## 参考記事
 
 - [BN6 Battle Objects Data](https://forums.therockmanexezone.com/bn6-battle-objects-data-t5346.html)
-
+- [BN5/BN6 Battle Objects](https://forums.therockmanexezone.com/viewtopic.php?p=344491#p344491)

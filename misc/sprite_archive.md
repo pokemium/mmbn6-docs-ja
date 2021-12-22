@@ -5,7 +5,6 @@
 ロックマンエグゼにおけるスプライトアーカイブのデータフォーマットは次のようになっています。
 
 ```go
-
 type SpriteArchive struct {
     MetadataHeader [4]byte // 後述
     AnimationPointerTable []SpriteAnimation
