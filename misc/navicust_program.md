@@ -63,3 +63,4 @@ NCPが正しいグループを持っているかどうかを確認すること�
 ## 参考記事
 
 - [BN6 NCP format](https://forums.therockmanexezone.com/bn6-ncp-format-t5257.html)
+

@@ -236,7 +236,7 @@ type WallSection struct {
 
 `WallSection.NumOfWallSegments` は文字通りセクションに含まれるセグメント数です。
 
-セグメントが1つ以上ある場合は終端記号として`0xffff`のグリッドインデックス（後述)と`WallParameter`のポインタが格納されています。
+セグメントが1つ以上ある場合は終端記号として`0xffff`のグリッドインデックス(後述)と`WallParameter`のポインタが格納されています。
 
 セグメントの配列の続きにはパラメータの配列があり、以下の壁プロパティを定義します。
 
@@ -264,7 +264,7 @@ type WallSegment struct {
 
 次の画像はエグゼ6で使用されている`0xFEx0xFE`のグリッドと、その上のグリッドのインデックスがどこにあるかを可視化したものです。
 
-![wall_grid](img/wallgrid.png)
+![wall_grid](../images/wallgrid.png)
 
 グリッドインデックスからマップ座標を取得するには次のように計算する必要があります。
 
@@ -305,8 +305,6 @@ type WallParameter struct {
 
 セグメントが使用するパラメータは、プレイヤーが壁にぶつかることができる条件と、壁にぶつかったときに何が起きるのかを指定するためのパラメータです。
 
-Walls only apply if the Z coordinate of the object colliding with it is between the wall's Z coordinate and the wall's range (Z coordinate + Z Range).
-
 壁は、衝突する物体のZ座標が`ZCoordinate`と`ZCoordinate+ZRange`の間にある場合にのみ、衝突判定を持ちます。
 
 `Attributes`は壁の種類によって効果が異なります。また壁のタイプによって、利用可能な`Shape`が変わってきます。これらは以下で説明します。
@@ -315,7 +313,7 @@ Walls only apply if the Z coordinate of the object colliding with it is between 
 
 境界壁として利用可能な`Shape`は次のようになっています。
 
-![boundary_wall](img/boundary_wall.png)
+![boundary_wall](../images/boundary_wall.png)
 
 - 赤 = ゲームがクラッシュします
 - 黒 = 壁にぶつかります
@@ -334,7 +332,7 @@ Walls only apply if the Z coordinate of the object colliding with it is between 
 
 標高領域には以下の`Shape`があります。
 
-![elevation_region](img/elevation_region.png)
+![elevation_region](../images/elevation_region.png)
 
 標高領域に衝突するオブジェクトは、そのZ座標が変更されます。
 
@@ -355,13 +353,13 @@ Walls only apply if the Z coordinate of the object colliding with it is between 
 
 カバー領域には以下の`Shape`があります。
 
-![cover_region](img/cover_region.png)
+![cover_region](../images/cover_region.png)
 
 ## イベント領域セクション
 
 イベント領域には以下の`Shape`があります。
 
-![event_region](img/event_region.png)
+![event_region](../images/event_region.png)
 
 プレイヤーがイベント領域に入った場合、何が起きるかは壁の属性(Attribute)に依存します。
 
@@ -395,7 +393,7 @@ Walls only apply if the Z coordinate of the object colliding with it is between 
 
 ## デモマップを用いた説明
 
-![demo_map](img/demo_map.png)
+![demo_map](../images/demo_map.png)
 
 以下は、壁/領域のいくつかと、フラグリスナー（マップスクリプトともいう）、テキストアーカイブ、マップオブジェクトなどの他のマップシステムとの相互作用を示すデモマップを用いた解説です。
 
@@ -405,7 +403,7 @@ Walls only apply if the Z coordinate of the object colliding with it is between 
 
 このマップには熱斗のPCからプラグインすることができます。
 
-![demo_map_grid_index](img/demo_map_grid_index.png)
+![demo_map_grid_index](../images/demo_map_grid_index.png)
 
 ### 境界壁
 
@@ -423,7 +421,7 @@ Walls only apply if the Z coordinate of the object colliding with it is between 
 
 デモマップでは、黒い領域がカバー領域になっています。プレイヤーがこの領域に入ると、黒い領域がプレイヤーの上に描画されます。
 
-![cover_region](img/cover_region.gif)
+![cover_region](../images/cover_region.gif)
 
 ### イベント領域
 
@@ -431,7 +429,7 @@ Walls only apply if the Z coordinate of the object colliding with it is between 
 
 **ワープ(exit)**
 
-![warp1](img/warp1.gif) ![warp2](img/warp2.gif) ![warp3](img/warp3.gif)
+![warp1](../images/warp1.gif) ![warp2](../images/warp2.gif) ![warp3](../images/warp3.gif)
 
 デモマップでは5つのワープ(英語ではExitとも呼ぶ)が存在します。
 
@@ -507,7 +505,7 @@ FL_WRITE_DATA_WORD 0x02011EA0 + (5*4), 0x08050002
 
 この設定後、プレイヤーが赤線に入ると、選択されたメッセージインデックスを用いたテキストボックスが表示されます。その後、プレイヤーは、領域内に入ることなく、選択された方向に指定した距離だけ歩きます。
 
-![warp5](img/warp5.gif)
+![warp5](../images/warp5.gif)
 
 **イベントのトリガー**
 
@@ -519,7 +517,7 @@ FL_WRITE_DATA_WORD 0x02011EA0 + (5*4), 0x08050002
 
 **黄色タイル**
 
-![trigger_event_0](img/trigger_event_0x10.gif)
+![trigger_event_0](../images/trigger_event_0x10.gif)
 
 黄色のタイルには`0x10`のAttributeが設定されています。
 
@@ -549,7 +547,7 @@ demo_map_color_shader:
 
 **グレイガ**
 
-![trigger_event_1](img/trigger_event_0x11.gif)
+![trigger_event_1](../images/trigger_event_0x11.gif)
 
 2つ目のイベントは、プレイヤーがマップの小島部分に入った時に発生します。
 

@@ -1,6 +1,6 @@
 # バトルミステリーデータ
 
-![](images/battle_mystery_data.png)
+![](../images/battle_mystery_data.png)
 
 後半のゲームでは、ミステリーデータが戦闘時にフィールドに出現することがあります。壊さずに戦闘に勝利すると、そのデータを手に入れることができます。
 
