@@ -839,11 +839,13 @@ magtect_object_init:
     pop {r4,r5,r6,r7,r15}
 ```
 
-オブジェクトルーチンのmainloopはメタルブレードのものと同じです。メタルブレード同様に初期化処理を行っていますが、唯一メタルブレードと違うのは、今回はオブジェクトのHPが新たに設定されている点です。
+オブジェクトルーチンのmainloopはメタルブレードのものと同じです。メタルブレード同様に初期化処理を行っていますが、メタルブレードと違うのは、今回はオブジェクトのHPが新たに設定されている点です。
 
-コリジョンは、衝突タイプを0x29、ターゲットを0x0dに設定しています。これはオブジェクトがMovement Blocking(?)で、味方のサポートオブジェクトであり、ターゲットが敵全般(Neutral Support Objects, Enemy Support Objects)であることを意味しています。
+コリジョンは、衝突タイプを0x29、ターゲットを0x0dに設定しています。これはオブジェクトが`Movement Blocking(?)`で、味方のサポートオブジェクトであり、ターゲットが敵全般(`Neutral Support Objects`, `Enemy Support Objects`)であることを意味しています。
 
-また、敵の出したアタックオブジェクトや敵の攻撃によるコリジョンを受け付けるので、このマグテクトにはダメージを与えることができます。 衝突データを作成できない場合は、`object_free_memory`の代わりに`magtect_destroy`を使用してオブジェクトを破壊します。
+また、敵の出したアタックオブジェクトや敵の攻撃によるコリジョンを受け付けるので、このマグテクトにはダメージを与えることができます。 
+
+衝突データを作成できない場合は、`object_free_memory`の代わりに`magtect_destroy`を使用してオブジェクトを破壊します。
 
 ```asm
 magtect_destroy:
@@ -893,10 +895,11 @@ magtect_object_update_pool:
     .word magtect_object_update_attack | 1  ; magnet attack
 ```
 
-This game checks damage using object_apply_damage.  This will return 1 if the object has 0 hp and 0 otherwise, it will also create an explosion when its HP reaches 0.
+ダメージのチェックは`object_apply_damage`で行われます。この関数はオブジェクトのHPが0なら`1`を、そうでない場合は`0`を返します。この関数はHPが0になったオブジェクトの爆発処理も行います。
 
-Next the object has to check if the parents reference to this object is still there, if it isn't then the parent has exited attack state and this object is no longer needed.
-The update routine jumps to a current state of the object, idle pull and attack.
+次にオブジェクトは、このオブジェクトに対して親からの参照が残っているかどうかをチェックしなければなりません。もし残っていなければ、親は攻撃状態を終了したことになり、このオブジェクトは必要なくなります。
+
+この場合、updateルーチンは、オブジェクトの現在の状態に応じた関数、idle(`magtect_object_update_idle`), pull(`magtect_object_update_pull`), attack(`magtect_object_update_attack`)にジャンプします。
 
 
 ```asm
@@ -906,13 +909,13 @@ magtect_object_update_idle:
     tst r0,r0
     bne .initialized
     mov r0,0x00
-    strb r0, [r5,0x10]  ; idle animation
+    strb r0, [r5,0x10]          ; idle animation
     mov r0,0x04
     strb r0, [r5,0x0A]
 .initialized:
-    ldr r0, [r5,0x4C]   ; get parent
-    ldr r0, [r0,0x58]   ; get parent AI data
-    ldrh r1, [r0,0x22]  ; get keys held
+    ldr r0, [r5,0x4C]           ; get parent
+    ldr r0, [r0,0x58]           ; get parent AI data
+    ldrh r1, [r0,0x22]          ; get keys held
     mov r2,GBAKEY_A
     tst r1,r2
     beq .dead
@@ -929,18 +932,21 @@ magtect_object_update_idle:
     bl magtect_destroy
 .endroutine:
     pop {r4,r5,r6,r7,r15}
+```
 
+```asm
 magtect_object_update_pull:
-    push {r4,r5,r6,r7,r14}
+    push r4-r7,r14
     ldrb r0, [r5,0x0A]
     tst r0,r0
     bne .initialized
     mov r0,0x01
-    strb r0, [r5,0x10]  ; pull animation
+    strb r0, [r5,0x10]          ; pull animation
     mov r0,0x04
     strb r0, [r5,0x0A]
     mov r0,0xF3
-    bl sound_play       ; play wavey sound
+    bl sound_play               ; play wavey sound
+
 .initialized:
     ; create collision object to pull enemies
     bl object_get_front_direction
@@ -949,11 +955,77 @@ magtect_object_update_pull:
     ldrb r1, [r5,0x13]          ; get panel y
     mov r2, AttackElement_NULL  ; no element
     mov r3,0x00                 ; z = 0
+
+    ; from left to right, collision setup r1, r2, hiteffect, shape
+    ldr r4, =0x0405FF08
+    mov r6,0x00                 ; no damage
+    mov r7,0x04                 ; pull enemy towards magtect
+    bl spawn_collision_region
+
+    ldr r0, [r5,0x4C]           ; get parent
+    ldr r0, [r0,0x58]           ; get parent AI data
+    ldrh r1, [r0,0x22]          ; get keys held
+    mov r2, GBAKey_B
+    tst r1,r2
+    bne .endroutine
+
+    ; B released go to attack phase
+    mov r0,0x08
+    strb r0, [r5,0x09]
+    mov r0,0x00
+    strb r0, [r5,0x0A]
+.endroutine:
+    pop r4-r7,r15
 ```
 
-Every routine gets the parent object struct and then gets its AI struct. It then uses this to get player inputs.
+```asm
+magtect_object_update_attack:
+    push r4-r7,r14
+    ldrb r0, [r5,0x0A]
+    tst r0,r0
+    bne .initialized
+    mov r0,0x02
+    strb r0, [r5,0x10]          ; pull animation
+    mov r0,0x04
+    strb r0, [r5,0x0A]
+    mov r0,0xF
+    strh r0, [r5,0x20]          ; timer for this phase
+
+    ; create collision object to pull enemies
+    bl object_get_front_direction
+    ldrb r1, [r5,0x12]
+    add r0,r1,r0                ; get panelx in front of magtect
+    ldrb r1, [r5,0x13]          ; get panel y
+    mov r2, AttackElement_Elec  ; no element
+    mov r3,0x00                 ; z = 0
+
+    ; from left to right, collision setup r1, r2, hiteffect, shape
+    ldr r4, =0x04050301         ;
+    ldr r6, [r5,0x2C]           ; attack damage
+    mov r7,0x03                 ; Flinches and causes invis
+    bl spawn_collision_region
+    mov r0,0xBA
+    bl sound_play               ; play spark sound
+.initialized:
+    ldrh r0, [r5,0x20]
+    sub r0,0x01
+    strh r0, [r5,0x20]
+    bgt .endroutine
+
+    ; go back to idle phase after time expires
+    mov r0,0x00
+    strb r0, [r5,0x09]
+    strb r0, [r5,0x0A]
+.endroutine:
+    pop r4-r7,r15
+```
+
+すべてのルーチンは、親オブジェクト構造体を取得し、次にそのAI構造体を取得します。そして、この構造体を使ってプレイヤーの入力を取得します。
+
 The Pull and Attack states rely on collision regions. This is a separate object the game commonly uses to create collisions in a timing sensitive manner.
+
 Pull uses a collision region that's in the shape of a 6x1 line that has the pull property is non-flinching to create the magnet pull effect.
+
 Attack then uses another collision region to attack the panel in front of the magtect without having to modify the object's collision region.
 
 You can look at the attached full code to see how the objects/attacks were added to the game.
