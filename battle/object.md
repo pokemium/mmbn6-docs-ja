@@ -428,7 +428,7 @@ A0h start of attack variable reigon (0x50 bytes)
 metalblade_attack_mainloop:
     push {r14}
     ldr r1, [metalblade_attack_mainloop_pool]
-    ldrb r0,[r7]    ; get which phase we left off on
+    ldrb r0,[r7]                ; get which phase we left off on
     ldr r1,[r1,r0]
     mov r14,r15
     bx r1
@@ -441,7 +441,7 @@ metalblade_attack_mainloop_pool:
 ; initルーチン
 metalblade_attack_init:
     push {r14}
-    ldrb r0, [r7,0x01]  ; BattleObject.CurAnim or BattleObject.CurAnimCopy
+    ldrb r0, [r7,0x01]          ; BattleObject.CurAnim or BattleObject.CurAnimCopy
     cmp r0, 0x00
     bne .initialized
 .init
@@ -449,7 +449,7 @@ metalblade_attack_init:
     strb r0, [r7,0x01]
     ; initフェイズのタイマーを設定
     mov r0,0x08
-    strh r0, [r7,0x10]  ; BattleObject.Timer or BattleObject.Timer2
+    strh r0, [r7,0x10]          ; BattleObject.Timer or BattleObject.Timer2
     ; アニメーションの設定+カウンター時間の設定
     mov r0,0x0c
     bl object_set_animation
@@ -851,8 +851,11 @@ magtect_object_init:
 magtect_destroy:
     push {r14}
     bl object_clear_collision_region
-    mov r0,0x08
-    str r0, [r5,0x08]   ; set to destroy routine
+
+    ; 08h(Current state)をDestroyに
+    mov r0,0x08         ; 0x08 = Destroy
+    str r0, [r5,0x08]
+
     mov r0,0x00
     ldr r1, [r5,0x60]   ; get parents pointer to this object
     str r0, [r1]        ; clear object
@@ -870,25 +873,33 @@ magtect_object_update:
     bl object_spawn_collision_effect
     mov r0,0x00
     bl object_apply_damage
-    tst r0,r0           ; check if dead
+    
+    ; HPが0になった場合は .dead へ
+    tst r0,r0           
     bne .dead
+
+    ; &parent が nil の場合は .dead へ
     ldr r0, [r5,0x60]   ; get parents refence to this object
     ldr r0, [r0]        ; check if its still there
     tst r0,r0
     beq .dead           ; if its cleared parent is not in attack state
-    ldrb r0, [r5,0x09]
+
+    ldrb r0, [r5,0x09]  ; 09h: Current "attack"/action
     ldr r1, [magtect_object_update_pool]
     ldr r0, [r1,r0]
     mov r14,r15
     bx r0
     bl object_update_sprite
     b .endroutine
+
 .dead:
-    bl magtect_destroy
+    bl magtect_destroy  ; オブジェクトの爆発処理?
+
 .endroutine:
     bl object_present_collision_data
     pop {r15}
     .balign 4, 0
+
 magtect_object_update_pool:
     .word magtect_object_update_idle | 1    ; wait for button presses
     .word magtect_object_update_pull | 1    ; pull enemy towards magtect while B pressed
@@ -897,7 +908,7 @@ magtect_object_update_pool:
 
 ダメージのチェックは`object_apply_damage`で行われます。この関数はオブジェクトのHPが0なら`1`を、そうでない場合は`0`を返します。この関数はHPが0になったオブジェクトの爆発処理も行います。
 
-次にオブジェクトは、このオブジェクトに対して親からの参照が残っているかどうかをチェックしなければなりません。もし残っていなければ、親は攻撃状態を終了したことになり、このオブジェクトは必要なくなります。
+次にオブジェクトは、このオブジェクトの持っている親のポインタを見て、親がまだ残っているかどうか(`nil`でないか)をチェックしなければなりません。もし残っていなければ、親は攻撃状態を終了したことになり、このオブジェクトは必要なくなります。
 
 この場合、updateルーチンは、オブジェクトの現在の状態に応じた関数、idle(`magtect_object_update_idle`), pull(`magtect_object_update_pull`), attack(`magtect_object_update_attack`)にジャンプします。
 
