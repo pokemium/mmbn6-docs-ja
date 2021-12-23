@@ -531,7 +531,9 @@ spawn_metalblade:
     pop r15
 ```
 
-このルーチンは、引数として panelX, panelY, element, zCoordinate, parameter(4byte), 親オブジェクト, damage を取りますが、object_spawn_type3 は引数として objectid, xcoordinate, ycoordinate, zcoordinate, parameter(4byte) を取ることに注意してください。
+この生成ルーチンは、引数として `panelX`, `panelY`, `element`, `zCoordinate`, `parameter`(4byte), `parent`(親オブジェクト), `damage` を取ります。
+
+ただし内部で呼び出している、`object_spawn_type3` は引数として `objectid`, `xoordinate`, `ycoordinate`, `zcoordinate`, `parameter(4byte)` を取ることに注意してください。
 
 このため、オブジェクトを初期化しながらパネルから座標を設定することが重要です。
 
@@ -563,7 +565,7 @@ initルーチンでは、オブジェクトをvisibleにし、スプライトを
 metalblade_object_init:
     push {r4,r5,r6,r7,r14}
 
-    ; BattleObject.Flagsの0x02を立てる(visibleフラグをセット)
+    ; BattleObject.FlagsのBit1(visibleフラグ)を立てる
     ldrb r0, [r5]
     mov r1, 0x02
     orr r0,r1
@@ -636,7 +638,7 @@ metalblade_object_init:
 
 この例では、獣化(ファルザー)のスプライトの直後の`WhiteDot`スプライトを使っています。
 
-衝突オブジェクトが作成された場合は、`object_setup_collision_data`で各プロパティを設定します。衝突タイプとヒット時の挙動を設定しています。上記の衝突タイプのリストから、このオブジェクトの衝突タイプは味方による攻撃扱いになります。つまりこの攻撃のターゲットはNeutral Support Objects、Enemy Support Objects、Enemy、Enemies、Attack Objects を対象としています。またヒット時の挙動は、インビジ状態にならず怯むように今回は設定します。
+衝突オブジェクトが作成された場合は、`object_setup_collision_data`で各プロパティを設定します。衝突タイプとヒット時の挙動を設定しています。上記の衝突タイプのリストから、このオブジェクトの衝突タイプは味方による攻撃扱いになります。つまりこの攻撃のターゲットは`Neutral Support Objects`, `Enemy Support Objects`, `Enemy`, `Enemies`, `Attack Objects` を対象としています。またヒット時の挙動は、インビジ状態にならず怯むように今回は設定します。
 
 次にupdateルーチンです。 このルーチンでは衝突を処理する必要があります。
 
