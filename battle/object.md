@@ -17,37 +17,37 @@
 ### データ構造
 
 ```
-00h object flags bitfield
-    0x01 active
-    0x02 visable
-    0x04 updates during pause
-    0x08 Hide/Dont update sprite
-    0x10 updates during timestop
-    0x20
-    0x40
-    0x80
-01h object index
-02h object type/sprite offset
+00h Object flags
+    Bit 0: active
+    Bit 1: visable
+    Bit 2: updates during pause
+    Bit 3: Hide/Dont update sprite
+    Bit 4: updates during timestop
+    Bit 5:
+    Bit 6:
+    Bit 7:
+01h Object index
+02h Object type/sprite offset
     0x0F Object type
     0xF0 relative sprite data offset (from start of object)
-03h object memory index
-04h object parameters1
-05h object parameters2
-06h object parameters3
-07h object parameters4
-08h current state, usually
+03h Object memory index
+04h Object parameters1
+05h Object parameters2
+06h Object parameters3
+07h Object parameters4
+08h Current state, usually
     0 - Initialize
     4 - Update
     8 - Destroy
-09h current "attack"/action (typically)
-0Ah current phase of "attack"/action (typically)
-0Bh indicates if current phase is initialized (typically)
+09h Current "attack"/action (typically)
+0Ah Current phase of "attack"/action (typically)
+0Bh Indicates if current phase is initialized (typically)
 0Ch 
 0Dh 
 0Eh Element
 0Fh 
-10h current animation
-11h current animation(copy)
+10h Current animation
+11h Current animation(copy)
 12h Panel X
 13h Panel Y
 14h Future Panel X
@@ -58,7 +58,7 @@
 17h Direction Flip
 18h Prevent animation
 19h 
-1ah chips held
+1ah Chips held
 1bh 
 1ch 
 1dh 
@@ -66,18 +66,18 @@
 1fh 
 20h Timer (typicaly)
 22h Secondary Timer (typically)
-24h curren thp
-26h max hp
-28h name id
-2Ah chip
-2Ch damage
+24h Curren thp
+26h Max hp
+28h Name id
+2Ah Chip
+2Ch Damage
     8000 double damage
     4000 paralyze
     2000 Uninstall
     1000 KillerCross Skull hit
     0800 nothing
     07FF damage
-2Eh stamina damage/counter disabler
+2Eh Stamina damage/counter disabler
     7F stamina damage
     80 disable counter
 34h Xposition
@@ -86,8 +86,8 @@
 40h X velocity
 44h Y velocity
 48h Z velocity
-4Ch pointer to parent / pointer to childobject1
-50h pointer to childobject2
+4Ch Pointer to parent / pointer to childobject1
+50h Pointer to childobject2
 54h Collision data
 58h AI Data
 5Ch ?
